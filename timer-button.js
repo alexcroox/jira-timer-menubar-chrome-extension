@@ -14,16 +14,20 @@ const injectTimerLink = () => {
   // Remove existing button
   if (document.getElementById('jira-timer-button'))
     document.getElementById('jira-timer-button').outerHTML = ''
+  
+  let currentTaskKey
 
-  let metaCurrentTaskKey = document.head.querySelector("[name=ajs-issue-key][content]")
+  const metaIssueKey = findTaskInMeta()
+  if (metaIssueKey)
+    currentTaskKey = metaIssueKey
 
-  console.log('JT: Found key?', metaCurrentTaskKey)
+  const urlIssueKey = findTaskInURL()
+  if (urlIssueKey)
+    currentTaskKey = urlIssueKey
 
   // Inject button if we have a task key
-  if (metaCurrentTaskKey) {
-    let currentTaskKey = metaCurrentTaskKey.content
-
-    console.log('JT: Injecting timer link')
+  if (currentTaskKey) {
+    console.log('JT: Injecting timer link for', currentTaskKey)
 
     timerLink = document.createElement('a')
     let timerLinkText = document.createTextNode(`Start timing ${currentTaskKey}`)
@@ -33,6 +37,25 @@ const injectTimerLink = () => {
     
     document.body.appendChild(timerLink)
   }
+}
+
+const findTaskInMeta = () => {
+  const metaCurrentTaskKey = document.head.querySelector("[name=ajs-issuekey][content]")
+  console.log('JT: Found key in meta?', metaCurrentTaskKey)
+
+  if (!metaCurrentTaskKey)
+    return false 
+  else
+    return metaCurrentTaskKey.content
+}
+
+const findTaskInURL = () => {
+  const urlParams = new URLSearchParams(window.location.search)
+  const urlIssueKey = urlParams.get('selectedIssue')
+
+  console.log('JT: Found issue key in URL?', urlIssueKey)
+
+  return urlIssueKey
 }
 
 injectTimerLink()
